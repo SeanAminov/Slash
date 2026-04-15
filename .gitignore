@@ -1,0 +1,38 @@
+# =========================
+# Unity generated folders
+# =========================
+[Ll]ibrary/
+[Tt]emp/
+[Bb]uild/
+[Bb]uilds/
+Obj/
+Logs/
+UserSettings/
+MemoryCaptures/
+
+# =========================
+# IDE / Editor files
+# =========================
+.vscode/
+.idea/
+*.sln
+*.csproj
+*.user
+*.userprefs
+
+# =========================
+# OS generated files
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# Build output & archives
+# =========================
+*.zip
+*.tar.gz
+*[Bb]uild*/
+*[Bb]uild/
+New folder/
+WebGL/
