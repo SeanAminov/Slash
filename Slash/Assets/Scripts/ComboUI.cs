@@ -3,12 +3,7 @@ using UnityEngine.UI;
 
 namespace Slash
 {
-    // On screen combo display. Built to scale and feel punchy: a constant idle
-    // pulse, a bigger pop on every combo increment, a much bigger pop when
-    // crossing a milestone, and color tiers that escalate as the combo climbs.
-    //
-    // All tuning knobs are exposed so font, size, style, colors, and animation
-    // speeds can be tweaked from the inspector without touching code.
+    // Combo counter with idle pulse, hit punch, milestone punch, and color tiers.
     public class ComboUI : MonoBehaviour
     {
         [Header("Wiring")]
@@ -16,7 +11,7 @@ namespace Slash
         public Text label;
 
         [Header("Format")]
-        public int minimumCombo = 1;     // display floor, always on screen at 1 or higher
+        public int minimumCombo = 1;
         public string suffix = "x";
 
         [Header("Idle Pulse")]
@@ -34,11 +29,11 @@ namespace Slash
 
         [Header("Color Tiers")]
         public Color[] tierColors = {
-            new Color(1.0f, 1.0f, 1.0f, 1f),   //   < 10
-            new Color(1.0f, 0.85f, 0.35f, 1f), // >= 10
-            new Color(1.0f, 0.55f, 0.25f, 1f), // >= 25
-            new Color(1.0f, 0.3f, 0.3f, 1f),   // >= 50
-            new Color(1.0f, 0.2f, 0.8f, 1f),   // >= 100
+            new Color(1.0f, 1.0f, 1.0f, 1f),
+            new Color(1.0f, 0.85f, 0.35f, 1f),
+            new Color(1.0f, 0.55f, 0.25f, 1f),
+            new Color(1.0f, 0.3f, 0.3f, 1f),
+            new Color(1.0f, 0.2f, 0.8f, 1f),
         };
         public int[] tierThresholds = { 10, 25, 50, 100 };
 
@@ -57,16 +52,11 @@ namespace Slash
             _punchScale = 1f;
         }
 
-        void Start()
-        {
-            if (player == null) player = FindObjectOfType<PlayerController>();
-        }
-
         void Update()
         {
-            if (label == null) return;
+            if (label == null || player == null) return;
 
-            int combo = player != null ? Mathf.Max(player.ComboCount, 0) : 0;
+            int combo = Mathf.Max(player.ComboCount, 0);
             int displayed = Mathf.Max(combo, minimumCombo);
 
             if (combo != _lastCombo)

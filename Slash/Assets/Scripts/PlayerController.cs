@@ -1,12 +1,13 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Slash
 {
-    // Player movement and attacks. Each M1 press is exactly one enemy hit.
-    // Holding A or D on the click zips to the nearest enemy in that direction.
-    // A clean click with no direction held is a neutral attack that stays on
+    // Player movement and attacks. Each attack input is exactly one enemy hit.
+    // Holding A or D on the press zips to the nearest enemy in that direction.
+    // A clean press with no direction held is a neutral attack that stays on
     // the current target, used to chip down heavier enemies.
     public class PlayerController : MonoBehaviour
     {
@@ -29,13 +30,22 @@ namespace Slash
         public float comboWindow = 2.0f;
         public float neutralMissGrace = 1.0f;
 
+        // Fires when a hit connects, passes the world position of the hit.
+        public event Action<Vector3> OnHitLanded;
+
         float _attackReadyAt;
         bool _zipping;
         Enemy _currentTarget;
         int _comboCount;
         float _comboExpireAt;
+        SlashTrail _trail;
 
         public int ComboCount => _comboCount;
+
+        void Awake()
+        {
+            _trail = GetComponent<SlashTrail>();
+        }
 
         void Update()
         {
@@ -60,13 +70,23 @@ namespace Slash
 
         void HandleAttack()
         {
-            var mouse = Mouse.current;
-            if (mouse == null || !mouse.leftButton.wasPressedThisFrame) return;
+            if (!AttackPressed()) return;
             if (Time.time < _attackReadyAt) return;
 
             int dir = ReadHeldDirection();
             if (dir != 0) DoDirectionalZip(dir);
             else DoNeutralAttack();
+        }
+
+        bool AttackPressed()
+        {
+            var mouse = Mouse.current;
+            if (mouse != null && mouse.leftButton.wasPressedThisFrame) return true;
+
+            var kb = Keyboard.current;
+            if (kb != null && kb.cKey.wasPressedThisFrame) return true;
+
+            return false;
         }
 
         int ReadHeldDirection()
@@ -110,6 +130,7 @@ namespace Slash
             {
                 t += Time.deltaTime;
                 transform.position = Vector3.Lerp(start, end, Mathf.Clamp01(t / zipDuration));
+                if (_trail != null) _trail.SpawnGhost();
                 yield return null;
             }
             transform.position = end;
@@ -202,6 +223,7 @@ namespace Slash
             _currentTarget = target;
             _comboCount++;
             _comboExpireAt = Time.time + comboWindow;
+            OnHitLanded?.Invoke(target.transform.position);
         }
 
         void BreakCombo()
