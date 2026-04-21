@@ -30,8 +30,9 @@ namespace Slash
         public float comboWindow = 2.0f;
         public float neutralMissGrace = 1.0f;
 
-        // Fires when a hit connects, passes the world position of the hit.
-        public event Action<Vector3> OnHitLanded;
+        // Fires when a hit connects. Passes the world position of the hit
+        // and the direction from the player to the target.
+        public event Action<Vector3, Vector2> OnHitLanded;
 
         float _attackReadyAt;
         bool _zipping;
@@ -223,7 +224,12 @@ namespace Slash
             _currentTarget = target;
             _comboCount++;
             _comboExpireAt = Time.time + comboWindow;
-            OnHitLanded?.Invoke(target.transform.position);
+
+            Vector2 dir = (Vector2)(target.transform.position - transform.position);
+            if (dir.sqrMagnitude < 0.0001f) dir = new Vector2(1f, 0f);
+            else dir.Normalize();
+
+            OnHitLanded?.Invoke(target.transform.position, dir);
         }
 
         void BreakCombo()

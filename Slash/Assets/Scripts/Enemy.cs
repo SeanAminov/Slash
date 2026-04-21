@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,9 +7,11 @@ namespace Slash
     // Basic enemy. Tracks HP and a flashing hit reaction. The invincible flag
     // lets the prototype keep a training dummy around for feel testing.
     // Self-registers in a static list so the player can query nearest cheaply.
+    // Publishes OnAnyEnemyDied so coin spawners and ult systems can react.
     public class Enemy : MonoBehaviour
     {
         public static readonly List<Enemy> All = new List<Enemy>();
+        public static event Action<Vector3> OnAnyEnemyDied;
 
         [Header("Stats")]
         public int maxHP = 1;
@@ -50,13 +53,11 @@ namespace Slash
         {
             if (invincible)
             {
-                //Debug.Log($"{name} is invincible, shrugged off {amount}");
                 Flash();
                 return;
             }
 
             CurrentHP -= amount;
-            //Debug.Log($"{name} took {amount}, HP {CurrentHP}/{maxHP}");
             Flash();
 
             if (CurrentHP <= 0) Die();
@@ -69,7 +70,7 @@ namespace Slash
 
         void Die()
         {
-            //Debug.Log($"{name} died");
+            OnAnyEnemyDied?.Invoke(transform.position);
             Destroy(gameObject);
         }
     }
